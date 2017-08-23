@@ -2,26 +2,29 @@
 
 var Buffer = require('safe-buffer').Buffer
 var bscript = require('../../script')
+var types = require('../../types')
 var typeforce = require('typeforce')
 
 function check (script, allowIncomplete) {
+  typeforce(types.Buffer, script)
   var chunks = bscript.decompile(script)
   if (chunks.length < 1) return false
 
   var lastChunk = chunks[chunks.length - 1]
   if (!Buffer.isBuffer(lastChunk)) return false
 
-  var scriptSigChunks = bscript.decompile(bscript.compile(chunks.slice(0, -1)))
+  var scriptSig = bscript.compile(chunks.slice(0, -1))
   var redeemScriptChunks = bscript.decompile(lastChunk)
 
   // is redeemScript a valid script?
   if (redeemScriptChunks.length === 0) return false
 
   // is redeemScriptSig push only?
+  var scriptSigChunks = bscript.decompile(scriptSig)
   if (!bscript.isPushOnly(scriptSigChunks)) return false
 
-  var inputType = bscript.classifyInput(scriptSigChunks, allowIncomplete)
-  var outputType = bscript.classifyOutput(redeemScriptChunks)
+  var inputType = bscript.classifyInput(scriptSig, allowIncomplete)
+  var outputType = bscript.classifyOutput(lastChunk)
   if (chunks.length === 1) {
     return outputType === bscript.types.P2WSH || outputType === bscript.types.P2WPKH
   }
@@ -29,33 +32,34 @@ function check (script, allowIncomplete) {
 }
 check.toJSON = function () { return 'scriptHash input' }
 
-function encodeStack (redeemScriptStack, redeemScript) {
-  var serializedScriptPubKey = bscript.compile(redeemScript)
+function encodeRaw (redeemScriptSig, redeemScript) {
+  redeemScriptSig = bscript.decompile(redeemScriptSig)
+  var serializedRedeemScript = bscript.compile(redeemScript)
 
-  return [].concat(redeemScriptStack, serializedScriptPubKey)
+  return [].concat(redeemScriptSig, serializedRedeemScript)
+}
+
+function encodeStack (redeemScriptSig, redeemScript) {
+  return bscript.toStack(encodeRaw(redeemScriptSig, redeemScript))
 }
 
 function encode (redeemScriptSig, redeemScript) {
-  var redeemScriptStack = bscript.decompile(redeemScriptSig)
-
-  return bscript.compile(encodeStack(redeemScriptStack, redeemScript))
-}
-
-function decodeStack (stack) {
-  typeforce(check, stack)
-
-  return {
-    redeemScriptStack: stack.slice(0, -1),
-    redeemScript: stack[stack.length - 1]
-  }
+  return bscript.compile(encodeRaw(redeemScriptSig, redeemScript))
 }
 
 function decode (buffer) {
-  var stack = bscript.decompile(buffer)
-  var result = decodeStack(stack)
-  result.redeemScriptSig = bscript.compile(result.redeemScriptStack)
-  delete result.redeemScriptStack
-  return result
+  typeforce(check, buffer)
+  var chunks = bscript.decompile(buffer)
+  return {
+    redeemScriptSig: bscript.compile(chunks.slice(0, -1)),
+    redeemScript: chunks[chunks.length - 1]
+  }
+}
+
+function decodeStack (stack, allowIncomplete) {
+  typeforce(types.Stack, stack)
+  var buffer = bscript.compile(stack)
+  return decode(buffer, allowIncomplete)
 }
 
 module.exports = {
@@ -63,5 +67,6 @@ module.exports = {
   decode: decode,
   decodeStack: decodeStack,
   encode: encode,
-  encodeStack: encodeStack
+  encodeStack: encodeStack,
+  encodeRaw: encodeRaw
 }

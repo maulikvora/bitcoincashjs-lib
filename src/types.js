@@ -43,6 +43,7 @@ var types = {
   Hash256bit: typeforce.BufferN(32),
   Network: Network,
   Satoshi: Satoshi,
+  Stack: typeforce.arrayOf(typeforce.Buffer),
   UInt31: UInt31
 }
 

@@ -209,8 +209,8 @@ module.exports = {
 
   isCanonicalPubKey: isCanonicalPubKey,
   isCanonicalSignature: isCanonicalSignature,
-  isPushOnly: isPushOnly,
-  isDefinedHashType: isDefinedHashType
+  isDefinedHashType: isDefinedHashType,
+  isPushOnly: isPushOnly
 }
 
 var templates = require('./templates')

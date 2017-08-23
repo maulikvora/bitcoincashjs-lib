@@ -1,9 +1,11 @@
 // {signature} {pubKey}
 
 var bscript = require('../../script')
+var types = require('../../types')
 var typeforce = require('typeforce')
 
 function check (script) {
+  typeforce(types.Buffer, script)
   var chunks = bscript.decompile(script)
 
   return chunks.length === 2 &&
@@ -12,7 +14,7 @@ function check (script) {
 }
 check.toJSON = function () { return 'pubKeyHash input' }
 
-function encodeStack (signature, pubKey) {
+function encodeRaw (signature, pubKey) {
   typeforce({
     signature: bscript.isCanonicalSignature,
     pubKey: bscript.isCanonicalPubKey
@@ -24,22 +26,27 @@ function encodeStack (signature, pubKey) {
   return [signature, pubKey]
 }
 
-function encode (signature, pubKey) {
-  return bscript.compile(encodeStack(signature, pubKey))
+function encodeStack (signature, pubKey) {
+  return bscript.toStack(encodeRaw(signature, pubKey))
 }
 
-function decodeStack (stack) {
-  typeforce(check, stack)
-
-  return {
-    signature: stack[0],
-    pubKey: stack[1]
-  }
+function encode (signature, pubKey) {
+  return bscript.compile(encodeRaw(signature, pubKey))
 }
 
 function decode (buffer) {
-  var stack = bscript.decompile(buffer)
-  return decodeStack(stack)
+  typeforce(check, buffer)
+  var chunks = bscript.decompile(buffer)
+  return {
+    signature: chunks[0],
+    pubKey: chunks[1]
+  }
+}
+
+function decodeStack (stack) {
+  typeforce(types.Stack, stack)
+  var buffer = bscript.compile(stack)
+  return decode(buffer)
 }
 
 module.exports = {
@@ -47,5 +54,6 @@ module.exports = {
   decode: decode,
   decodeStack: decodeStack,
   encode: encode,
-  encodeStack: encodeStack
+  encodeStack: encodeStack,
+  encodeRaw: encodeRaw
 }

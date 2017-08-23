@@ -71,10 +71,12 @@ function expandInput (scriptSig, witnessStack) {
   var witnessProgram
   var chunks
 
-  var scriptSigChunks = bscript.decompile(scriptSig)
-  var sigType = bscript.classifyInput(scriptSigChunks, true)
+  var sigType = bscript.classifyInput(scriptSig, true)
+  var scriptSigChunks
+
   if (sigType === scriptTypes.P2SH) {
     p2sh = true
+    scriptSigChunks = bscript.decompile(scriptSig)
     redeemScript = scriptSigChunks[scriptSigChunks.length - 1]
     redeemScriptType = bscript.classifyOutput(redeemScript)
     prevOutScript = bscript.scriptHash.output.encode(bcrypto.hash160(redeemScript))
@@ -141,9 +143,11 @@ function expandInput (scriptSig, witnessStack) {
 
     script = redeemScript
     scriptType = redeemScriptType
+    scriptSigChunks = bscript.decompile(scriptSig)
     chunks = scriptSigChunks.slice(0, -1)
   } else {
     prevOutType = scriptType = bscript.classifyInput(scriptSig)
+    scriptSigChunks = bscript.decompile(scriptSig)
     chunks = scriptSigChunks
   }
 
@@ -463,7 +467,7 @@ function buildInput (input, allowIncomplete) {
   return {
     type: scriptType,
     script: bscript.compile(sig),
-    witness: bscript.toStack(witness)
+    witness: witness
   }
 }
 
