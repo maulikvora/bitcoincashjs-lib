@@ -27,6 +27,7 @@ function encodeRaw (signature, pubKey) {
 }
 
 function encodeStack (signature, pubKey) {
+  console.warn('decodeStack/encodeStack is deprecated for non-Witness types')
   return bscript.toStack(encodeRaw(signature, pubKey))
 }
 
@@ -44,6 +45,7 @@ function decode (buffer) {
 }
 
 function decodeStack (stack) {
+  console.warn('decodeStack/encodeStack is deprecated for non-Witness types')
   typeforce(types.Stack, stack)
   var buffer = bscript.compile(stack)
   return decode(buffer)
