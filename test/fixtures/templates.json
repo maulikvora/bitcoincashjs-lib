@@ -316,6 +316,12 @@
         {
           "description": "redeemScript is a signature, therefore not a valid script",
           "input": "OP_0 3045022100e12b17b3a4c80c401a1687487bd2bafee9e5f1f8f1ffc6180ce186672ad7b43a02205e316d1e5e71822f5ef301b694e578fa9c94af4f5f098c952c833f4691307f4e01"
+        },
+        {
+          "exception": "TypeError: P2SH scriptSigs are PUSH only",
+          "redeemScriptSig": "OP_0 OP_CHECKMULTISIG",
+          "redeemScript": "OP_0",
+          "input": "OP_0 OP_CHECKMULTISIG 00"
         }
       ],
       "outputs": [

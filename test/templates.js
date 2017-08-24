@@ -317,8 +317,8 @@ describe('script-templates', function () {
     fixtures.valid.forEach(function (f) {
       if (f.type !== 'scripthash') return
 
-      var redeemScript = bscript.fromASM(f.redeemScript)
       var redeemScriptSig = bscript.fromASM(f.redeemScriptSig)
+      var redeemScript = bscript.fromASM(f.redeemScript)
       var input = bscript.scriptHash.input.encode(redeemScriptSig, redeemScript)
       var inputStack = bscript.scriptHash.input.encodeStack(redeemScriptSig, redeemScript)
 
@@ -340,6 +340,26 @@ describe('script-templates', function () {
           redeemScriptSig: redeemScriptSig,
           redeemScript: redeemScript
         })
+      })
+    })
+
+    fixtures.invalid.scriptHash.inputs.forEach(function (f) {
+      if (!f.exception) return
+
+      it('throws on ' + f.exception, function () {
+        var input = bscript.fromASM(f.input)
+
+        assert.throws(function () {
+          bscript.scriptHash.input.decode(input)
+        }, /Expected scriptHash input, got Buffer/)
+
+        if (!f.redeemScript) return
+        var redeemScriptSig = bscript.fromASM(f.redeemScriptSig)
+        var redeemScript = bscript.fromASM(f.redeemScript)
+
+        assert.throws(function () {
+          bscript.scriptHash.input.encode(redeemScriptSig, redeemScript)
+        }, new RegExp(f.exception))
       })
     })
   })

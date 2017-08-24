@@ -34,6 +34,8 @@ check.toJSON = function () { return 'scriptHash input' }
 
 function encodeRaw (redeemScriptSig, redeemScript) {
   redeemScriptSig = bscript.decompile(redeemScriptSig)
+  if (!bscript.isPushOnly(redeemScriptSig)) throw new TypeError('P2SH scriptSigs are PUSH only')
+
   var serializedRedeemScript = bscript.compile(redeemScript)
 
   return [].concat(redeemScriptSig, serializedRedeemScript)
