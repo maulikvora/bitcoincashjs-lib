@@ -1,7 +1,6 @@
 // {scriptSig} {serialized scriptPubKey script}
 
 var bscript = require('../../script')
-var p2sh = require('../scripthash/input')
 var types = require('../../types')
 var typeforce = require('typeforce')
 
@@ -24,8 +23,16 @@ function checkStack (stack, allowIncomplete) {
 }
 checkStack.toJSON = function () { return 'witnessScriptHash input' }
 
+function encodeRaw (redeemScriptSig, redeemScript) {
+  redeemScriptSig = bscript.decompile(redeemScriptSig)
+  if (!bscript.isPushOnly(redeemScriptSig)) throw new TypeError('P2WSH scriptSigs are PUSH only')
+
+  var serializedRedeemScript = bscript.compile(redeemScript)
+  return [].concat(redeemScriptSig, serializedRedeemScript)
+}
+
 function encodeStack (witnessStack, witnessScript) {
-  return bscript.toStack(p2sh.encodeRaw(witnessStack, witnessScript))
+  return bscript.toStack(encodeRaw(witnessStack, witnessScript))
 }
 
 function decodeStack (stack) {
@@ -39,5 +46,6 @@ function decodeStack (stack) {
 module.exports = {
   checkStack: checkStack,
   decodeStack: decodeStack,
+  encodeRaw: encodeRaw,
   encodeStack: encodeStack
 }

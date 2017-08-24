@@ -17,7 +17,7 @@ function checkStack (stack) {
 }
 checkStack.toJSON = function () { return 'witnessPubKeyHash input' }
 
-function encodeStack (signature, pubKey) {
+function encodeRaw (signature, pubKey) {
   typeforce({
     signature: bscript.isCanonicalSignature,
     pubKey: isCompressedCanonicalPubKey
@@ -40,5 +40,6 @@ function decodeStack (stack) {
 module.exports = {
   checkStack: checkStack,
   decodeStack: decodeStack,
-  encodeStack: encodeStack
+  encodeRaw: encodeRaw,
+  encodeStack: encodeRaw
 }

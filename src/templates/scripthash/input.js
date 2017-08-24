@@ -37,7 +37,6 @@ function encodeRaw (redeemScriptSig, redeemScript) {
   if (!bscript.isPushOnly(redeemScriptSig)) throw new TypeError('P2SH scriptSigs are PUSH only')
 
   var serializedRedeemScript = bscript.compile(redeemScript)
-
   return [].concat(redeemScriptSig, serializedRedeemScript)
 }
 
