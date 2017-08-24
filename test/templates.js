@@ -61,11 +61,9 @@ describe('script-templates', function () {
 
     describe(name + '.input.check', function () {
       fixtures.valid.forEach(function (f) {
-        if (name.toLowerCase() === bscript.types.P2WPKH) return
-        if (name.toLowerCase() === bscript.types.P2WSH) return
         var expected = name.toLowerCase() === f.type.toLowerCase()
 
-        if (inputType && f.input) {
+        if (inputType && f.input && inputType.check) {
           var input = bscript.fromASM(f.input)
 
           it('returns ' + expected + ' for ' + f.input, function () {
@@ -74,9 +72,23 @@ describe('script-templates', function () {
 
           if (f.typeIncomplete) {
             var expectedIncomplete = name.toLowerCase() === f.typeIncomplete
-
-            it('returns ' + expected + ' for ' + f.input, function () {
+            it('returns ' + expectedIncomplete + ' for ' + f.input, function () {
               assert.strictEqual(inputType.check(input, true), expectedIncomplete)
+            })
+          }
+        }
+
+        if (inputType && f.inputStack && inputType.checkStack) {
+          var inputStack = f.inputStack.map(function (x) { return Buffer.from(x, 'hex') })
+
+          it('returns ' + expected + ' stack for [' + f.inputStack + ']', function () {
+            assert.strictEqual(inputType.checkStack(inputStack), expected)
+          })
+
+          if (f.typeIncomplete) {
+            expectedIncomplete = name.toLowerCase() === f.typeIncomplete
+            it('returns ' + expectedIncomplete + ' for ' + f.input, function () {
+              assert.strictEqual(inputType.checkStack(inputStack, true), expectedIncomplete)
             })
           }
         }
