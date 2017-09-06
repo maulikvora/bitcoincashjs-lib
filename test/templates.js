@@ -81,7 +81,7 @@ describe('script-templates', function () {
         if (inputType && f.inputStack && inputType.checkStack) {
           var inputStack = f.inputStack.map(function (x) { return Buffer.from(x, 'hex') })
 
-          it('returns ' + expected + ' stack for [' + f.inputStack + ']', function () {
+          it('returns ' + expected + ' for stack [' + f.inputStack + ']', function () {
             assert.strictEqual(inputType.checkStack(inputStack), expected)
           })
 
